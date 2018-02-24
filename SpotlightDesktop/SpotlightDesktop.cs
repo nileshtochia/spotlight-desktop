@@ -18,11 +18,15 @@ namespace SpotlightDesktop
 
         public string GetCurrentSpotlightWallpaperPath()
         {
-            var lockScreenKey = Registry.GetValue(@"HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Lock Screen\Creative", "LandscapeAssetPath", null);
-            if (lockScreenKey != null)
-            {
-                return lockScreenKey.ToString();
+            var userCreativeAssetsKey = RegistryHelpers.GetRegistryKey(
+                RegistryHive.LocalMachine, 
+                string.Format(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\Creative\{0}", 
+                WindowsIdentity.GetCurrent().User.ToString()));
+            var creativeAssetKey = userCreativeAssetsKey.OpenSubKey(userCreativeAssetsKey.GetSubKeyNames().Max(c => long.Parse(c)).ToString());
 
+            if (creativeAssetKey != null)
+            {
+                return creativeAssetKey.GetValue("landscapeImage").ToString();
             }
             return null;
         }
